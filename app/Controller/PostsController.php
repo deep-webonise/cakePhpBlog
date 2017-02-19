@@ -1,46 +1,13 @@
 <?php
 
-/**
- * Application level Controller
- *
- * This file is application-wide controller file. You can put all
- * application-wide controller-related methods here.
- *
- * PHP 5
- *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
- *
- * Licensed under The MIT License
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright 2005-2012, Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @package       app.Controller
- * @since         CakePHP(tm) v 0.2.9
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
- */
-App::uses('Controller', 'Controller');
-
-/**
- * Application Controller
- *
- * Add your application-wide methods in the class below, your controllers
- * will inherit them.
- *
- * @package       app.Controller
- * @link http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
- */
-class PostsController extends AppController {
-
-    public $helpers = array('Html', 'Form', 'Flash');
-    public $components = array('Flash');
-
+class PostsController extends Controller {
+    public $helpers = array('Html', 'Form');
+    
     public function index() {
         $this->set('posts', $this->Post->find('all'));
     }
-
-    public function view($id) {
+    
+     public function view($id = null) {
         if (!$id) {
             throw new NotFoundException(__('Invalid post'));
         }
@@ -51,16 +18,18 @@ class PostsController extends AppController {
         }
         $this->set('post', $post);
     }
-
-    public function add() {
+    
+     public function add() {
         if ($this->request->is('post')) {
             $this->Post->create();
             if ($this->Post->save($this->request->data)) {
+                $this->Flash->success(__('Your post has been saved.'));
                 return $this->redirect(array('action' => 'index'));
             }
+            $this->Flash->error(__('Unable to add your post.'));
         }
     }
-
+    
     public function edit($id = null) {
         if (!$id) {
             throw new NotFoundException(__('Invalid post'));
@@ -74,24 +43,31 @@ class PostsController extends AppController {
         if ($this->request->is(array('post', 'put'))) {
             $this->Post->id = $id;
             if ($this->Post->save($this->request->data)) {
+                $this->Flash->success(__('Your post has been updated.'));
                 return $this->redirect(array('action' => 'index'));
             }
+            $this->Flash->error(__('Unable to update your post.'));
         }
 
         if (!$this->request->data) {
             $this->request->data = $post;
         }
     }
-
+    
     public function delete($id) {
         if ($this->request->is('get')) {
             throw new MethodNotAllowedException();
         }
 
         if ($this->Post->delete($id)) {
+            $this->Flash->success(
+                __('The post with id: %s has been deleted.', h($id))
+            );
         } else {
-       }
+            $this->Flash->error(
+                __('The post with id: %s could not be deleted.', h($id))
+            );
+        }
         return $this->redirect(array('action' => 'index'));
     }
-
 }
